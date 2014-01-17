@@ -4,30 +4,52 @@
 #include <iostream>
 using namespace std;
 
-int encode(int before, double *map,int w,int np)
-{
-	double d_b = before;
-	double d_w = w;
-	double d_np = np;
-	double d_p = d_np/d_w;
+// Decimal value to 8bit
+void D2B(int *v_8b,int value);
 
-	double j1,j2;
+// Encoder
+int encode(int before, int *L_8b, int *Ha_8b, int *Hb_8b, int w,int np)
+{
+	float d_b = before;
+	float d_w = w;
+	float d_np = np;
+	float d_p = d_np/d_w;
+	float L, Ha, Hb;
+	int Lev, Haev, Hbev;
+
+	float j1,j2;
 	// L
-	map[0] = (d_b+0.5)/d_w;
+	L = (d_b+0.5)/d_w;
+	Lev = int(255*L+0.5);
+	D2B(L_8b,Lev);
 	
 	// Ha
-	j1 = fmod(map[0]/(d_p/2),2.0);
+	j1 = fmod(L/(d_p/2),2);
 	if(j1<=1)
-		map[1] = j1;
-	else map[1] = 2-j1;
+		Ha = j1;
+	else Ha = 2-j1;
+	Haev = int(255*Ha+0.5);
+	D2B(Ha_8b,Haev);
 
 	//Hb
-	j2 = fmod((map[0]-d_p/4)/(d_p/2),2);
+	j2 = fmod((L-d_p/4)/(d_p/2),2);
 	if(j2<=1)
-		map[2] = j2;
-	else map[2] = 2-j2;
+		Hb = j2;
+	else Hb = 2-j2;
+	Hbev = int(255*Hb+0.5);
+	D2B(Hb_8b,Hbev);
 
 	return 0;
+}
+
+void D2B(int *v_8b,int value)
+{
+	for(int i=0;i<8;i++)
+	{
+		v_8b[i] = value%2;
+		if(value/2==0) break;
+		value /= 2;
+	}
 }
 
 #endif // ENCODER_H_INCLUDED
